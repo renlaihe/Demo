@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.xms.dao.MainMapper">
+
+	<!-- 查询全部课程方向 -->
+	<select id="findAllCourseDirection" resultType="CourseDirection">
+		select * from xc_course_direction
+	</select>
+	
+	<!-- 查询全部实战推荐课程 -->
+	<select id="findAllDemoCourse" resultType="Course">
+		select * from xc_course where content_id = 2 and price > 0
+	</select>
+	
+	<!-- 查询全部新手入门课程 -->
+	<select id="findAllNewCourse" resultType="Course">
+		select * from xc_course where content_id = 1 and price > 0
+	</select>
+	
+	<select id="findCourseByContentId"
+		parameterType="integer" resultType="Course">
+		select * from xc_course where content_id = #{contentId} and price > 0
+	</select>
+	
+	<!-- 根据课程方向ID查询对应课程内容 -->
+	<select id="findCourseContentByCourseDirectionId"
+		parameterType="integer" resultType="CourseContent">
+		select distinct xcc.* from xc_course_direction_content xcdc 
+		 	join xc_course_content xcc on xcdc.cc_id = xcc.id
+		 		<if test="courseDirectionId != 0">
+		 			where xcdc.cd_id = #{courseDirectionId}
+		 		</if>
+	</select>
+	
+	<!-- 根据课程方向ID和课程内容ID查询课程 -->
+	<select id="findCourseByCourseDirectionIdAndCourseContentId"
+		parameterType="java.util.Map" resultType="Course">
+		select * from xc_course 
+			<where>
+				<if test="courseDirectionId != 0">
+					direction_id = #{courseDirectionId} 
+				</if>
+				<if test="courseContentId != 0">
+					and content_id = #{courseContentId}
+				</if>
+			</where>
+	</select>
+	
+	<!-- 根据课程ID查询课程信息 -->
+	<select id="findCourseByCourseId"
+		parameterType="integer" resultType="Course">
+		select * from xc_course where id = #{courseId}
+	</select>
+	
+	<!-- 根据用户ID查找购物车 -->
+	<select id="findCarByUserId" parameterType="integer" resultType="Car">
+		select * from xc_car where u_id = #{id}
+	</select>
+	
+	<!-- 创建购物车 -->
+	<insert id="saveCar" parameterType="Car"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into xc_car values(#{id},#{u_id})
+	</insert>
+	
+	<!-- 根据购物车ID查询此购物车中全部商品ID -->
+	<select id="findCourseIdByCarId"
+		parameterType="integer" resultType="integer">
+		select xi.c_id from xc_car_item xci join
+		 	xc_item xi on xci.i_id = xi.id where xci.c_id = #{id}
+	</select>
+	
+	<!-- 生成商品条目 -->
+	<insert id="saveItem" parameterType="Item"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into xc_item values(#{id},#{c_id},
+			#{c_name},#{c_picture_url},#{c_price},#{add_time},#{remove_time})
+	</insert>
+	
+	<!-- 将商品条目添加到购物车 -->
+	<insert id="saveCarItem" parameterType="java.util.Map">
+		insert into xc_car_item values(#{c_id},#{i_id})
+	</insert>
+	
+	<!-- 根据用户ID查询对应购物车中商品条目信息 -->
+	<select id="findItemByUserId"
+		parameterType="integer" resultType="Item">
+		select xi.* from xc_car xc join xc_car_item xci on xc.id = 
+		 	xci.c_id join xc_item xi on xci.i_id = xi.id where xc.u_id = #{id}
+	</select>
+	
+	<!-- 根据商品条目ID删除Car_Item对应关系 -->
+	<delete id="deleteCarItem" parameterType="integer">
+		delete from xc_car_item where i_id = #{id}
+	</delete>
+	
+	<!-- 根据商品条目ID删除商品条目信息 -->
+	<delete id="deleteItem" parameterType="integer">
+		delete from xc_item where id = #{id}
+	</delete>
+	
+	<delete id="batchDeleteCarItem" parameterType="integer">
+		delete from xc_car_item where i_id in
+		<foreach collection="itemIds" item="itemId" open="(" close=")" separator=",">
+			#{itemId}
+		</foreach>
+	</delete>
+	
+	<delete id="batchDeleteItem" parameterType="integer">
+		delete from xc_item where id in
+		<foreach collection="itemIds" item="itemId" open="(" close=")" separator=",">
+			#{itemId}
+		</foreach>
+	</delete>
+	
+	<!-- 根据商品条目ID查询商品条目信息 -->
+	<select id="findItemByItemId"
+		parameterType="integer" resultType="Item">
+		select * from xc_item where id = #{id}
+	</select>
+	
+	<!-- 生成订单 -->
+	<insert id="saveOrder" parameterType="Order"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into xc_order values(#{id},#{u_id},
+			#{order_time},#{total_price},#{pay_type})
+	</insert>
+	
+	<!-- 将订单与商品条目关联 -->
+	<insert id="saveOrderItem" parameterType="java.util.Map">
+		insert into xc_order_item values(#{orderId},#{itemId})
+	</insert>
+
+</mapper>	

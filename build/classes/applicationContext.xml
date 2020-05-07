@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.3.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.3.xsd">
+
+	<util:properties id="db" location="classpath:db.properties"/>
+	
+	<bean id="ds" destroy-method="close"
+		class="org.apache.commons.dbcp2.BasicDataSource">
+		<property name="driverClassName" value="#{db.MySQL_Driver}"/>
+		<property name="url" value="#{db.MySQL_Url}"/>
+		<property name="username" value="#{db.MySQL_User}"/>
+		<property name="password" value="#{db.MySQL_Pwd}"/>
+	</bean>
+	
+	<bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="ds"/>
+		<property name="mapperLocations" value="classpath:com/xms/entity/mapper/*.xml"/>
+		<property name="typeAliasesPackage" value="com.xms.entity"/>
+		<!--  
+		<property name="plugins">
+			<array>
+				<bean class="com.github.pagehelper.PageInterceptor">
+					<property>
+						
+					</property>
+				</bean>
+			</array>
+		</property>
+		-->
+	</bean>
+	
+	<!-- 执行批量操作的sqlSession -->
+	<bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg name="sqlSessionFactory" ref="sqlSessionFactoryBean"/>
+		<constructor-arg name="executorType" value="BATCH"/>
+	</bean>
+	
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.xms.dao"/>
+		<property name="annotationClass" value="com.xms.annotation.MyAnnotation"/>
+	</bean>
+	
+	<context:component-scan base-package="com.xms"/>
+	
+	<mvc:annotation-driven/>
+	
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/"/>
+		<property name="suffix" value=".jsp"/>
+	</bean>
+	
+	<mvc:default-servlet-handler/>
+	
+	<mvc:interceptors>
+	
+		<!-- 是否登录 -->
+		<mvc:interceptor>
+			<mvc:mapping path="/**"/>
+			<mvc:exclude-mapping path="/login/*"/>
+			<mvc:exclude-mapping path="/registe/*"/>
+			<mvc:exclude-mapping path="/main/toIndex"/>
+			
+			<mvc:exclude-mapping path="/**/*.css"/>
+			<mvc:exclude-mapping path="/**/*.js"/>
+			<mvc:exclude-mapping path="/**/images/**"/>
+			<mvc:exclude-mapping path="/**/video/**"/>
+			
+			<bean class="com.xms.interceptor.LoginInterceptor"/>
+		</mvc:interceptor>
+	
+	</mvc:interceptors>
+	
+</beans>

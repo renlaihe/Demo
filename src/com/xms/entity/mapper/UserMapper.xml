@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.xms.dao.UserMapper">
+	
+	<!-- 根据邮箱查找用户 -->
+	<select id="findUserByEmail"
+		parameterType="string" resultType="User">
+		select * from xc_user where email = #{email}
+	</select>
+	
+	<!-- 保存用户注册信息 -->
+	<insert id="save" parameterType="User"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into xc_user values(#{id},
+			#{email},#{password},#{nickname},now())
+	</insert>
+	
+</mapper>	
