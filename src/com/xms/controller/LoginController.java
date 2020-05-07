@@ -32,7 +32,7 @@ public class LoginController {
 			request.setAttribute("message","�˺Ż��������");
 			return "jsp/login";
 		} else {
-//			�˺ź�������ȷ
+//			绑定客户信息到session
 			request.getSession().setAttribute("user",user);
 			return "redirect:/main/toIndex";
 		}
