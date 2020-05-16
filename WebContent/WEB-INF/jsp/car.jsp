@@ -16,15 +16,10 @@
 		<script type="text/javascript">
 		
 			var itemIds = [];
-			
 			function isChecked(){
-				
 				itemIds = [];
-				
 				//var x = 0;
-				
 				var totalPrice = 0.0;
-				
 				var item_checkboxs = document.getElementsByName("item_checkbox");
 				
 				for(var i=0;i<item_checkboxs.length;i++){

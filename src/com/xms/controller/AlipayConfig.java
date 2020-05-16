@@ -60,9 +60,7 @@ public class AlipayConfig {
 		for(Integer itemId : itemIds) {
 			Item item = mainService.findItemByItemId(itemId);
 			mainService.deleteCarItem(itemId);
-			
 			totalPrice += item.getC_price();
-			
 			items.add(item);
 		}
 	    
